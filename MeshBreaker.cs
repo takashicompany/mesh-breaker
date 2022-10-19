@@ -46,6 +46,7 @@
 		/// メッシュを割る
 		/// </summary>
 		/// <returns></returns>
+		[ContextMenu("Break")]
 		public List<Renderer> Break()
 		{
 			var list = new List<Renderer>();
