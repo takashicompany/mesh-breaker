@@ -1,4 +1,4 @@
-﻿namespace TakashiCompany.Unity
+﻿namespace takashicompany.Unity
 {
 	using System.Collections;
 	using System.Collections.Generic;
@@ -237,5 +237,37 @@
 			}
 		}
 #endregion
+	}
+
+	public static class MeshBreakerExtensions
+	{
+		public static List<Rigidbody> Explode(this IEnumerable<Renderer> targets, Vector3 point, float force, float radius)
+		{
+			var rigidbodies = new List<Rigidbody>();
+
+			foreach (var renderer in targets)
+			{
+				var rigidbody = renderer.gameObject.AddComponent<Rigidbody>();
+				var collider = renderer.gameObject.AddComponent<MeshCollider>();
+				collider.convex = true;
+				var center = renderer.bounds.center;
+
+				// var force = (center - point).normalized * power;
+
+				rigidbody.AddExplosionForce(force, point, radius);
+
+				// var torque = new Vector3(
+				// 	Random.Range(-1, 1f),
+				// 	Random.Range(-1f, 1f),
+				// 	Random.Range(-1f, 1f)
+				// ).normalized;
+
+				// rigidbody.AddTorque(torque * 500);
+
+				rigidbodies.Add(rigidbody);
+			}
+
+			return rigidbodies;
+		}
 	}
 }
