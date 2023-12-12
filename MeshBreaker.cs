@@ -59,7 +59,7 @@
 
 			var position = _target.transform.position;
 
-			_pieces = Break(_target, _breakLevel, _pieceRoot != null ? _pieceRoot : transform.parent, _capMaterial);
+			_pieces = Break(_target, _breakLevel, _pieceRoot != null ? _pieceRoot : transform.parent, _capMaterial != null ? _capMaterial : _target.sharedMaterial);
 			list.AddRange(_pieces);
 
 #if UNITY_EDITOR
