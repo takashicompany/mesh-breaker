@@ -26,6 +26,9 @@
 		[SerializeField, Header("分割する世代数。多いほど細かくなる(そして処理が重くなる)")]
 		private int _breakLevel = 3;
 
+		[SerializeField, Header("最適化オプション。UnityMeshSimplifier.MeshSimplifierが入っていると使える。メッシュが崩壊することもあるので注意。")]
+		private bool _useOptimize = false;
+
 		private void Awake()
 		{
 			if (_preBreakOnAwake)
@@ -72,7 +75,7 @@
 				{
 					var mesh = _pieces[i].GetComponent<MeshFilter>().sharedMesh;
 
-					if (meshSimplifierType != null)
+					if (_useOptimize && meshSimplifierType != null)
 					{
 						var meshSimplifier = Activator.CreateInstance(meshSimplifierType);
 						meshSimplifierType.GetMethod("Initialize").Invoke(meshSimplifier, new object[] { mesh });
