@@ -1,5 +1,6 @@
 ﻿namespace takashicompany.Unity
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using UnityEngine;
@@ -32,7 +33,7 @@
 				Break();
 			}
 		}
-		
+
 		/// <summary>
 		/// 既に割られているか
 		/// </summary>
@@ -65,21 +66,27 @@
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
-				//var so = new UnityEditor.SerializedObject(this);
+				Type meshSimplifierType = Type.GetType("UnityMeshSimplifier.MeshSimplifier");
+
 				for (int i = 0; i < _pieces.Length; i++)
 				{
 					var mesh = _pieces[i].GetComponent<MeshFilter>().sharedMesh;
+
+					if (meshSimplifierType != null)
+					{
+						var meshSimplifier = Activator.CreateInstance(meshSimplifierType);
+						meshSimplifierType.GetMethod("Initialize").Invoke(meshSimplifier, new object[] { mesh });
+						meshSimplifierType.GetMethod("SimplifyMesh").Invoke(meshSimplifier, new object[] { 0.5f });
+						mesh = (Mesh)meshSimplifierType.GetMethod("ToMesh").Invoke(meshSimplifier, null);
+						Debug.Log("UnityMeshSimplifier.MeshSimplifierを使用してメッシュを最適化しました。");
+					}
+
 					if (!UnityEditor.AssetDatabase.IsValidFolder("Assets/BrokenMeshes"))
 					{
 						UnityEditor.AssetDatabase.CreateFolder("Assets", "BrokenMeshes");
 					}
 					UnityEditor.AssetDatabase.CreateAsset(mesh, "Assets/BrokenMeshes/" + System.Guid.NewGuid() + ".asset");
-					
-					// var so = new UnityEditor.SerializedObject(_pieces[i].GetComponent<MeshFilter>());
-					// so.FindProperty("m_Mesh").objectReferenceValue = mesh;
-					// so.Update();
-					// so.ApplyModifiedProperties();
-					
+
 					_pieces[i].GetComponent<MeshFilter>().sharedMesh = mesh;
 
 					UnityEditor.EditorUtility.SetDirty(_pieces[i].GetComponent<MeshFilter>());
@@ -87,9 +94,8 @@
 
 				UnityEditor.EditorUtility.SetDirty(this);
 				UnityEditor.EditorUtility.SetDirty(this.gameObject);
-				
+
 				UnityEditor.AssetDatabase.SaveAssets();
-				
 			}
 #endif
 			return list;
@@ -135,7 +141,7 @@
 		}
 
 
-#region static関数
+		#region static関数
 
 		/// <summary>
 		/// メッシュを割る
@@ -208,8 +214,9 @@
 			{
 				return;
 			}
-			
-			var beforeCutPlane = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized;
+
+			var beforeCutPlane = new Vector3(
+				UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f)).normalized;
 
 			beforeCutPlane = target.transform.rotation * beforeCutPlane;
 
@@ -231,13 +238,13 @@
 				if (r != null)
 				{
 					hashSet.Add(r);
-					
+
 					// もう一度呼ぶ
 					CutOnce(root, r, capMaterial, maxGeneration, generation, hashSet);
 				}
 			}
 		}
-#endregion
+		#endregion
 	}
 
 	public static class MeshBreakerExtensions
