@@ -62,11 +62,11 @@
 
 			_pieces = Break(_target, _breakLevel, _pieceRoot != null ? _pieceRoot : transform.parent, _capMaterial != null ? _capMaterial : _target.sharedMaterial);
 			list.AddRange(_pieces);
-
+			
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
-				Type meshSimplifierType = Type.GetType("UnityMeshSimplifier.MeshSimplifier");
+				Type meshSimplifierType = Type.GetType("UnityMeshSimplifier.MeshSimplifier, Whinarn.UnityMeshSimplifier.Runtime");
 
 				for (int i = 0; i < _pieces.Length; i++)
 				{
@@ -77,8 +77,9 @@
 						var meshSimplifier = Activator.CreateInstance(meshSimplifierType);
 						meshSimplifierType.GetMethod("Initialize").Invoke(meshSimplifier, new object[] { mesh });
 						meshSimplifierType.GetMethod("SimplifyMesh").Invoke(meshSimplifier, new object[] { 0.5f });
-						mesh = (Mesh)meshSimplifierType.GetMethod("ToMesh").Invoke(meshSimplifier, null);
-						Debug.Log("UnityMeshSimplifier.MeshSimplifierを使用してメッシュを最適化しました。");
+						var optimized = (Mesh)meshSimplifierType.GetMethod("ToMesh").Invoke(meshSimplifier, null);
+						Debug.Log("UnityMeshSimplifier.MeshSimplifierを使用してメッシュを最適化しました。: vertext:" + mesh.vertexCount + " -> " + optimized.vertexCount + "triangles:" + mesh.triangles.Length + " -> " + optimized.triangles.Length);
+						mesh = optimized;
 					}
 
 					if (!UnityEditor.AssetDatabase.IsValidFolder("Assets/BrokenMeshes"))
